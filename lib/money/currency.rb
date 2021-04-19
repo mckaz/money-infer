@@ -103,9 +103,9 @@ class Money
         if object.nil?
           nil
         elsif object.is_a?(Currency)
-          object
+          RDL.type_cast(object, "Money::Currency")
         else
-          Currency.new(object)
+          Currency.new(RDL.type_cast(object, "String or Symbol"))
         end
       end
 
@@ -195,7 +195,7 @@ class Money
         if curr.is_a?(Hash)
           key = curr.fetch(:iso_code).downcase.to_sym
         else
-          key = curr.downcase.to_sym
+          key = RDL.type_cast(curr, "String or Symbol").downcase.to_sym
         end
         existed = @table.delete(key)
         @stringified_keys = nil if existed
@@ -282,7 +282,9 @@ class Money
     #
     # @param [Money::Currency] other_currency The currency to compare to.
     #
-    # @return [-1,0,1] -1 if less than, 0 is equal to, 1 if greater than
+    # @return Integer
+    ## MKCHANGE, original was type listed below
+    #[-1,0,1] -1 if less than, 0 is equal to, 1 if greater than
     #
     # @example
     #   c1 = Money::Currency.new(:usd)

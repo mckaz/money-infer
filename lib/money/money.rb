@@ -280,7 +280,7 @@ class Money
   # @example
   #   Money.add_rate("USD", "CAD", 1.25) #=> 1.25
   def self.add_rate(from_currency, to_currency, rate)
-    Money.default_bank.add_rate(from_currency, to_currency, rate)
+    RDL.type_cast(Money.default_bank.add_rate(from_currency, to_currency, rate), "Float")
   end
 
   # Sets the default bank to be a SingleCurrency bank that raises on
@@ -336,13 +336,13 @@ class Money
   def initialize( obj, currency = Money.default_currency, options = {})
     # For backwards compatability, if options is not a Hash, treat it as a bank parameter
     unless options.is_a?(Hash)
-      options = { bank: options }
+      options = { bank: RDL.type_cast(options, "Money::Bank::VariableExchange") }
     end
 
-    @fractional = as_d(obj.respond_to?(:fractional) ? obj.fractional : obj)
-    @currency   = obj.respond_to?(:currency) ? obj.currency : Currency.wrap(currency)
+    @fractional = as_d(obj.respond_to?(:fractional) ? RDL.type_cast(obj, "Money").fractional : obj)
+    @currency   = obj.respond_to?(:currency) ? RDL.type_cast(obj, "Money").currency : Currency.wrap(currency)
     @currency ||= Money.default_currency
-    @bank       = obj.respond_to?(:bank) ? obj.bank : options[:bank]
+    @bank       = obj.respond_to?(:bank) ? RDL.type_cast(obj, "Money").bank : RDL.type_cast(options[:bank], "Money::Bank::VariableExchange")
     @bank     ||= Money.default_bank
 
     # BigDecimal can be Infinity and NaN, money of that amount does not make sense
@@ -653,7 +653,7 @@ class Money
 
   def as_d(num)
     if num.respond_to?(:to_d)
-      num.is_a?(Rational) ? num.to_d(self.class.conversion_precision) : num.to_d
+      num.is_a?(Rational) ? RDL.type_cast(num, "Rational").to_d(self.class.conversion_precision) : RDL.type_cast(num, "Integer").to_d
     else
       BigDecimal(num.to_s.empty? ? 0 : num.to_s)
     end

@@ -14,8 +14,8 @@ class Money
     #
     def self.generate(amount, parts, whole_amounts = true)
       parts = if parts.is_a?(Numeric)
-        Array.new(parts, 1)
-      elsif parts.all?(&:zero?)
+        Array.new(RDL.type_cast(parts, "Numeric"), 1)
+      elsif RDL.type_cast(parts, "Array<Numeric>").all?(&:zero?)
         Array.new(parts.count, 1)
       else
         parts.dup
@@ -27,7 +27,7 @@ class Money
       remaining_amount = amount
 
       until parts.empty? do
-        parts_sum = parts.inject(0, :+)
+        parts_sum = RDL.type_cast(parts.inject(0, :+), "Numeric")
         part = parts.pop
 
         current_split = 0

@@ -1,4 +1,4 @@
-# encoding: UTF-8
+# encoding: utf-8
 
 class Money
   class FormattingRules
@@ -37,7 +37,7 @@ class Money
       if rules.size == 0
         rules = {}
       elsif rules.size == 1
-        rules = rules.pop
+        rules = RDL.type_cast(rules, "Array<Hash<Symbol, Object>>").pop
         rules = rules.dup if rules.is_a?(Hash)
 
         if rules.is_a?(Symbol)

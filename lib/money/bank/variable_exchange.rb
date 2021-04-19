@@ -62,7 +62,7 @@ class Money
       end
 
       def store
-        @store.is_a?(String) ? Object.const_get(@store) : @store
+        RDL.type_cast(@store.is_a?(String) ? Object.const_get(RDL.type_cast(@store, "String")) : @store, "Money::RatesStore::Memory")
       end
 
       def marshal_dump
@@ -127,7 +127,7 @@ class Money
       def calculate_fractional(from, to_currency)
         BigDecimal(from.fractional.to_s) / (
           BigDecimal(from.currency.subunit_to_unit.to_s) /
-          BigDecimal(to_currency.subunit_to_unit.to_s)
+          BigDecimal(RDL.type_cast(to_currency, "Money::Currency").subunit_to_unit.to_s)
         )
       end
 
@@ -222,7 +222,7 @@ class Money
         raise Money::Bank::UnknownRateFormat unless RATE_FORMATS.include?(format)
 
         store.transaction do
-          s = FORMAT_SERIALIZERS[format].dump(rates)
+          s = RDL.type_cast(FORMAT_SERIALIZERS[format].dump(rates), "String")
 
           unless file.nil?
             File.open(file, "w") {|f| f.write(s) }
@@ -268,7 +268,7 @@ class Money
         end
 
         store.transaction do
-          data = FORMAT_SERIALIZERS[format].load(s)
+          data = RDL.type_cast(FORMAT_SERIALIZERS[format].load(s), "Hash<String, Float>")
 
           data.each do |key, rate|
             from, to = key.split(SERIALIZER_SEPARATOR)

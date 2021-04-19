@@ -40,7 +40,7 @@ class Money
       #   store.add_rate("CAD", "USD", 0.803115)
       def add_rate(currency_iso_from, currency_iso_to, rate)
         guard.synchronize do
-          rates[rate_key_for(currency_iso_from, currency_iso_to)] = rate
+          RDL.type_cast(rates, "Hash<String, Integer>")[rate_key_for(currency_iso_from, currency_iso_to)] = rate
         end
       end
 
